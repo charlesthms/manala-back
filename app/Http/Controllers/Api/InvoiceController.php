@@ -16,7 +16,8 @@ class InvoiceController extends Controller
   {
     // Retourner toutes les factures de ce mois, avec les relations
     $invoice = Invoice::with(['client', 'items', 'client.horses'])
-      ->whereMonth('date', date('m'))
+      ->whereIn('status', [0, 1])
+      ->whereMonth('date', date('m', strtotime('+1 month')))
       ->get();
 
     return response(json_encode($invoice), 200);

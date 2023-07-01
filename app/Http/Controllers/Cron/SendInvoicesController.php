@@ -12,6 +12,7 @@ class SendInvoicesController extends Controller
   public function sendInvoices()
   {
 
+    $email_sent = 0;
     $queue = Invoice::where('status', 1)->get();
 
     foreach ($queue as $invoice) {
@@ -31,19 +32,20 @@ class SendInvoicesController extends Controller
 
       Mail::send('mails.template', ['invoice' => $invoice_data], function($message) use ($data, $pdf, $filename) {
         //$message->to($data["email"])->subject($data["title"])->cc('alexia@ecurieduvalhalla.fr');
-        $message->to('carlitoo.thomas@gmail.com')->subject($data["title"])->cc('alexia@ecurieduvalhalla.fr');
-
+        $message->to('carlitoo.thomas@gmail.com')->subject($data["title"]);
         $message->attachData($pdf->output(), $filename);
       });
 
-      //$invoice->status = 2;
-      //$invoice->save();
+      dd('email envoyé');
 
-      dd('ok');
+      $invoice->status = 2;
+      $invoice->save();
+
+      $email_sent++;
 
     }
 
-    dd('ok');
+    dd($email_sent . ' emails envoyés');
 
   }
 

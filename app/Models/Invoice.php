@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use ZipArchive;
 
 class Invoice extends Model
 {
@@ -92,6 +94,52 @@ class Invoice extends Model
       return PDF::loadView('pdf.template', compact('invoice'));
     }
 
+  }
+
+  public static function exportMonthFolder()
+  {
+    // Get the start and end date of the month
+    $startDate = Carbon::now()->subMonth()->startOfMonth();
+    $endDate = Carbon::now()->subMonth()->endOfMonth();
+
+    // Get the invoices within the date range
+    $invoices = Invoice::whereBetween('date', [$startDate, $endDate])->get();
+
+    // Create a temporary folder to store the PDFs
+    $tempFolder = storage_path('app/temp');
+    if (!file_exists($tempFolder)) {
+      mkdir($tempFolder, 0755, true);
+    }
+
+    // Generate PDFs and save them in the temporary folder
+    foreach ($invoices as $invoice) {
+      $pdf = $invoice->generatePDF(true)['pdf'];
+      $pdfPath = $tempFolder . '/' . $invoice->id . '.pdf';
+      $pdf->save($pdfPath);
+    }
+
+    // Create a zip archive
+    $zipPath = storage_path('app/invoices.zip');
+    $zip = new ZipArchive;
+    $zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+
+    // Add the PDFs to the zip archive
+    $pdfFiles = glob($tempFolder . '/*.pdf');
+    foreach ($pdfFiles as $pdfFile) {
+      $zip->addFile($pdfFile, basename($pdfFile));
+    }
+
+    // Close the zip archive
+    $zip->close();
+
+    // Remove the temporary folder and PDFs
+    foreach ($pdfFiles as $pdfFile) {
+      unlink($pdfFile);
+    }
+    rmdir($tempFolder);
+
+    // Return the path to the zip folder
+    return $zipPath;
   }
 
 }
