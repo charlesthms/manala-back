@@ -31,12 +31,9 @@ class SendInvoicesController extends Controller
       $filename = $invoice->invoice_number . '_' . $invoice->horse()->get()[0]->name . ".pdf";
 
       Mail::send('mails.template', ['invoice' => $invoice_data], function($message) use ($data, $pdf, $filename) {
-        //$message->to($data["email"])->subject($data["title"])->cc('alexia@ecurieduvalhalla.fr');
-        $message->to('carlitoo.thomas@gmail.com')->subject($data["title"]);
+        $message->to($data["email"])->subject($data["title"])->cc('alexia@ecurieduvalhalla.fr');
         $message->attachData($pdf->output(), $filename);
       });
-
-      dd('email envoyé');
 
       $invoice->status = 2;
       $invoice->save();

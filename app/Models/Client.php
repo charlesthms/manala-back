@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Client extends Model
 {
-  use HasFactory, HasUuids;
+  use HasFactory, HasUuids, SoftDeletes;
 
   protected $fillable = [
     'first_name',
@@ -39,9 +40,13 @@ class Client extends Model
     return $this->hasMany(Invoice::class);
   }
 
-  public function generateInvoice(Horse $horse) {
+  public function generateInvoice(Horse $horse, $currentMonth = false) {
     // Générer un numéro de facture
-    $invoiceNumber = 'FC' . date('ym', strtotime('+1 month')) . str_pad(Invoice::whereMonth('date', now()->addMonth()->month)->whereYear('date', now()->year)->count() + 1, 2, '0', STR_PAD_LEFT);
+    if ($currentMonth) {
+      $invoiceNumber = 'FC' . date('ym', strtotime('+1 month')) . str_pad(Invoice::whereMonth('date', now()->addMonth()->month)->whereYear('date', now()->year)->count() + 1, 2, '0', STR_PAD_LEFT);
+    } else {
+      $invoiceNumber = 'FC' . date('ym', strtotime('+1 month')) . str_pad(Invoice::whereMonth('date', now()->addMonth()->month)->whereYear('date', now()->year)->count() + 1, 2, '0', STR_PAD_LEFT);
+    }
 
     // Créer la facture
     $invoice = $this->invoices()->create([
@@ -49,7 +54,7 @@ class Client extends Model
       'pension_id'     => $horse->pension_id,
       'horse_id'       => $horse->id,
       'status'         => 0,
-      'date'           => now()->addMonth()->startOfMonth()->format('Y-m-d'),
+      'date'           => $currentMonth ? now()->startOfMonth()->format('Y-m-d') : now()->addMonth()->startOfMonth()->format('Y-m-d'),
     ]);
 
     // Ajouter les options

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreInvoiceRequest;
 use App\Http\Requests\UpdateInvoiceRequest;
 use App\Models\Invoice;
+use Carbon\Carbon;
 
 class InvoiceController extends Controller
 {
@@ -17,7 +18,7 @@ class InvoiceController extends Controller
     // Retourner toutes les factures de ce mois, avec les relations
     $invoice = Invoice::with(['client', 'items', 'client.horses'])
       ->whereIn('status', [0, 1])
-      ->whereMonth('date', date('m', strtotime('+1 month')))
+      //->whereMonth('date', Carbon::now()->addMonthNoOverflow()->month) INUTILE ?
       ->get();
 
     return response(json_encode($invoice), 200);
@@ -25,7 +26,9 @@ class InvoiceController extends Controller
   }
 
   public function archives() {
-    $invoices = Invoice::with(['client', 'items', 'client.horses'])
+    $invoices = Invoice::with(['client' => function ($query) {
+      $query->withTrashed(); // Include soft-deleted clients
+    }, 'items', 'client.horses'])
       ->where('status', 2)
       ->get();
 
@@ -45,7 +48,9 @@ class InvoiceController extends Controller
    */
   public function show(Invoice $invoice)
   {
-    $invoice = Invoice::with(['client', 'items'])
+    $invoice = Invoice::with(['client'=> function ($query) {
+      $query->withTrashed(); // Include soft-deleted clients
+    }, 'items'])
       ->where('id', $invoice->id)
       ->first();
 
@@ -68,6 +73,8 @@ class InvoiceController extends Controller
    */
   public function destroy(Invoice $invoice)
   {
-      //
+    $invoice->deleteInvoice();
+
+    return response($invoice, 200);
   }
 }

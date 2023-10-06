@@ -85,16 +85,9 @@ class ClientController extends Controller
   public function destroy(Client $client)
   {
 
-    $client->invoices()->each(function (Invoice $invoice) {
-      $invoice->items()->delete();
-    });
+    $deleted = $client->delete();
 
-    $client->invoices()->delete();
-    $client->options()->delete();
-    $client->horses()->delete();
-    $client->delete();
-
-    return response(null, 204);
+    return response(json_encode("deleted : " . $deleted), 204);
   }
 
   public function invoices(Client $client)
@@ -106,4 +99,31 @@ class ClientController extends Controller
   {
     return response($client->horses, 200);
   }
+
+  public function generateInvoice(Client $client)
+  {
+    $horses = $client->horses;
+    $count = 0;
+
+    foreach($horses as $horse) {
+      $client->generateInvoice($horse, true);
+      $count++;
+    }
+
+    return response($count . " factures générées.", 201);
+  }
+
+  public function canGenerateInvoice(Client $client) {
+    $invoice = $client->invoices()
+      ->where('date', '>=', now()->startOfMonth())
+      ->where('date', '<=', now()->endOfMonth())
+      ->first();
+
+    if(isset($invoice)) {
+      return response(json_encode(false), 200);
+    } else {
+      return response(json_encode(true), 200);
+    }
+  }
+
 }

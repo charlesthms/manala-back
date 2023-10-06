@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\InvoiceItemController;
 use App\Http\Controllers\Api\PensionController;
 use App\Http\Controllers\PDFController;
 use App\Models\Invoice;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
@@ -29,15 +30,17 @@ use Illuminate\Support\Facades\Storage;
 Route::post('/signup', [AuthController::class, 'signup']);
 Route::post('/login',  [AuthController::class, 'login']);
 
-Route::get('/pdf/{id}', [PDFController::class, 'generatePDF']);
+Route::get('/pdf/{invoice_id}', [PDFController::class, 'generatePDF']);
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
 
-  Route::post('/logout',                         [AuthController::class, 'logout']);
-  Route::post('/me',                             [AuthController::class, 'me']);
+  Route::post('/logout',                            [AuthController::class, 'logout']);
+  Route::post('/me',                                [AuthController::class, 'me']);
 
-  Route::get('/clients/{client}/invoices',       [ClientController::class, 'invoices']);
-  Route::get('/invoices/archives',               [InvoiceController::class, 'archives']);
+  Route::get('/clients/{client}/invoices',           [ClientController::class, 'invoices']);
+  Route::get('/invoices/archives',                   [InvoiceController::class, 'archives']);
+  Route::get('/clients/{client}/generateInvoice',    [ClientController::class, 'generateInvoice']);
+  Route::get('/clients/{client}/canGenerateInvoice', [ClientController::class, 'canGenerateInvoice']);
 
   Route::apiResource('/pensions',     PensionController::class);
   Route::apiResource('/clients',      ClientController::class);
@@ -53,13 +56,6 @@ Route::get('emails/{id}', [App\Http\Controllers\EmailController::class, 'view'])
 Route::get('/cron/send', [App\Http\Controllers\Cron\SendInvoicesController::class, 'sendInvoices']);
 Route::get('/cron/gen',  [App\Http\Controllers\Cron\GenerateInvoicesController::class, 'index']);
 
-Route::get('/zip', function (Request $request) {
-  // Generate and secure the zip path
-  $zipPath = Invoice::exportMonthFolder();
-  $securedZipPath = Storage::disk('local')->url($zipPath);
+Route::get('/export', [App\Http\Controllers\Api\ExportController::class, 'export']);
 
-  // Return the secured zip path
-  return response()->json(['zip_path' => $securedZipPath]);
-});
-
-
+//Route::get("/debug", [App\Http\Controllers\Api\ExportController::class, 'export']);

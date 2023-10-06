@@ -274,9 +274,7 @@
           </div>
         </td>
       </tr>
-      <tr>
-        <td class="text-center" colspan="2"><small>Si vous rencontrez des problèmes d'affichage, <a href="{{ route('emails.view', encrypt($invoice['id'])) }}" style="color: white !important;">cliquez pour afficher l'email dans votre navigateur</a></small></td>
-      </tr>
+
       </tbody>
     </table>
 

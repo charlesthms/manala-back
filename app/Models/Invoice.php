@@ -42,6 +42,19 @@ class Invoice extends Model
     return $this->hasMany(InvoiceItem::class);
   }
 
+  public function deleteInvoice()
+  {
+    // Delete related items
+    $this->items()->delete();
+
+    // Delete the invoice
+    $this->delete();
+
+    // Optionally, you may want to delete the associated PDFs or perform other cleanup
+
+    return true; // Or you can return a response indicating the success or failure of the deletion
+  }
+
   public function getTotalAttribute()
   {
     return $this->items->sum(function (InvoiceItem $item) {
@@ -52,7 +65,7 @@ class Invoice extends Model
   public function generatePDF($getData = false): array | \Barryvdh\DomPDF\PDF
   {
     // Trouver le client
-    $client = $this->client;
+    $client = $this->client()->withTrashed()->first();
 
     // Trouver les items de la facture
     $items = $this->items;
@@ -96,30 +109,26 @@ class Invoice extends Model
 
   }
 
-  public static function exportMonthFolder()
+  public static function exportMonthFolder($date)
   {
-    // Get the start and end date of the month
-    $startDate = Carbon::now()->subMonth()->startOfMonth();
-    $endDate = Carbon::now()->subMonth()->endOfMonth();
-
-    // Get the invoices within the date range
-    $invoices = Invoice::whereBetween('date', [$startDate, $endDate])->get();
-
     // Create a temporary folder to store the PDFs
     $tempFolder = storage_path('app/temp');
     if (!file_exists($tempFolder)) {
       mkdir($tempFolder, 0755, true);
     }
 
+    // Get the invoices within the date range
+    $invoices = Invoice::where('date', Carbon::createFromFormat("d/m/Y", $date)->format("Y/m/d"))->get();
+
     // Generate PDFs and save them in the temporary folder
     foreach ($invoices as $invoice) {
       $pdf = $invoice->generatePDF(true)['pdf'];
-      $pdfPath = $tempFolder . '/' . $invoice->id . '.pdf';
+      $pdfPath = $tempFolder . '/' . $invoice->invoice_number . '-' . $invoice->horse->name . '.pdf';
       $pdf->save($pdfPath);
     }
 
     // Create a zip archive
-    $zipPath = storage_path('app/invoices.zip');
+    $zipPath = storage_path('app/' . Carbon::createFromFormat('d/m/Y', $date)->format('m-Y') . '.zip');
     $zip = new ZipArchive;
     $zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
 
