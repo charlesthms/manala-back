@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\HorsesController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\InvoiceItemController;
 use App\Http\Controllers\Api\PensionController;
+use App\Http\Controllers\Api\Statistics;
 use App\Http\Controllers\PDFController;
 use App\Models\Invoice;
 use Carbon\Carbon;
@@ -31,6 +32,7 @@ Route::post('/signup', [AuthController::class, 'signup']);
 Route::post('/login',  [AuthController::class, 'login']);
 
 Route::get('/pdf/{invoice_id}', [PDFController::class, 'generatePDF']);
+Route::apiResource('/pensions',     PensionController::class);
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
 
@@ -41,8 +43,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
   Route::get('/invoices/archives',                   [InvoiceController::class, 'archives']);
   Route::get('/clients/{client}/generateInvoice',    [ClientController::class, 'generateInvoice']);
   Route::get('/clients/{client}/canGenerateInvoice', [ClientController::class, 'canGenerateInvoice']);
+  Route::get('/analytics/pensionRepartion',          [Statistics::class, 'pensionRepartion']);
+  Route::get('/analytics/monthlyIncomes',          [Statistics::class, 'monthlyIncomes']);
 
-  Route::apiResource('/pensions',     PensionController::class);
   Route::apiResource('/clients',      ClientController::class);
   Route::apiResource('/clientOption', ClientOptionController::class);
   Route::apiResource('/invoices',     InvoiceController::class);
@@ -58,4 +61,8 @@ Route::get('/cron/gen',  [App\Http\Controllers\Cron\GenerateInvoicesController::
 
 Route::get('/export', [App\Http\Controllers\Api\ExportController::class, 'export']);
 
-//Route::get("/debug", [App\Http\Controllers\Api\ExportController::class, 'export']);
+Route::get("/debug", function () {
+  return response()->json([
+    'message' => 'Up and running!'
+  ]);
+});

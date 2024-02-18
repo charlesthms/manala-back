@@ -26,6 +26,8 @@ class UpdatePensionRequest extends FormRequest
       'name'  => ['required', 'string', Rule::unique('pensions')->ignore($this->pension->id)],
       'price' => 'required|numeric',
       'color' => 'string',
+      'description' => 'string',
+      'attributes' => 'string',
     ];
   }
 }

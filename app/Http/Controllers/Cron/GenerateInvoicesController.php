@@ -38,19 +38,4 @@ class GenerateInvoicesController extends Controller
 
   }
 
-  public function update() {
-    // Obtenir toutes les factures du mois courant
-    $invoices = Invoice::whereMonth('date', now()->month)
-      ->whereYear('date', now()->year)
-      ->get();
-
-    // Mettre à jour le mois des factures au mois suivant
-    foreach ($invoices as $invoice) {
-      $invoice->update([
-        'date' => '2023-07-01',
-      ]);
-    }
-
-  }
-
 }

@@ -43,9 +43,9 @@ class Client extends Model
   public function generateInvoice(Horse $horse, $currentMonth = false) {
     // Générer un numéro de facture
     if ($currentMonth) {
-      $invoiceNumber = 'FC' . date('ym', strtotime('+1 month')) . str_pad(Invoice::whereMonth('date', now()->addMonth()->month)->whereYear('date', now()->year)->count() + 1, 2, '0', STR_PAD_LEFT);
+      $invoiceNumber = 'FC' . date('ym', strtotime('+0 month')) . str_pad(Invoice::whereMonth('date', now()->month)->whereYear('date', now()->year)->count() + 1, 2, '0', STR_PAD_LEFT);
     } else {
-      $invoiceNumber = 'FC' . date('ym', strtotime('+1 month')) . str_pad(Invoice::whereMonth('date', now()->addMonth()->month)->whereYear('date', now()->year)->count() + 1, 2, '0', STR_PAD_LEFT);
+      $invoiceNumber = 'FC' . date('ym', strtotime('+1 month')) . str_pad(Invoice::whereMonth('date', now()->addMonth()->month)->whereYear('date', now()->addMonth()->year)->count() + 1, 2, '0', STR_PAD_LEFT);
     }
 
     // Créer la facture
