@@ -29,10 +29,8 @@ use Illuminate\Support\Facades\Storage;
 // Debug bar
 
 Route::post('/signup', [AuthController::class, 'signup']);
-Route::post('/login',  [AuthController::class, 'login']);
 
 Route::get('/pdf/{invoice_id}', [PDFController::class, 'generatePDF']);
-Route::apiResource('/pensions',     PensionController::class);
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
 
@@ -44,15 +42,19 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
   Route::get('/clients/{client}/generateInvoice',    [ClientController::class, 'generateInvoice']);
   Route::get('/clients/{client}/canGenerateInvoice', [ClientController::class, 'canGenerateInvoice']);
   Route::get('/analytics/pensionRepartion',          [Statistics::class, 'pensionRepartion']);
-  Route::get('/analytics/monthlyIncomes',          [Statistics::class, 'monthlyIncomes']);
+  Route::get('/analytics/monthlyIncomes',            [Statistics::class, 'monthlyIncomes']);
+  Route::get('/pensions/refresh',                    [PensionController::class, 'refreshPrices']);
 
   Route::apiResource('/clients',      ClientController::class);
   Route::apiResource('/clientOption', ClientOptionController::class);
   Route::apiResource('/invoices',     InvoiceController::class);
   Route::apiResource('/horses',       HorsesController::class);
   Route::apiResource('/invoiceItem',  InvoiceItemController::class);
-
 });
+
+Route::post('/login',  [AuthController::class, 'login']);
+
+Route::apiResource('/pensions',     PensionController::class);
 
 Route::get('emails/{id}', [App\Http\Controllers\EmailController::class, 'view'])->name('emails.view');
 
