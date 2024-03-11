@@ -65,7 +65,7 @@ class PensionController extends Controller
 
   public function webPensions()
   {
-    return Pension::where("display", true)->get();
+    return Pension::where("display", true)->get(['id', 'name', 'price', 'description', 'attributes', 'display']);
   }
 
   public function refreshPrices()
