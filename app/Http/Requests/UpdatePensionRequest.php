@@ -28,6 +28,7 @@ class UpdatePensionRequest extends FormRequest
       'color' => 'string',
       'description' => 'string',
       'attributes' => 'string',
+      'display' => 'boolean'
     ];
   }
 }
