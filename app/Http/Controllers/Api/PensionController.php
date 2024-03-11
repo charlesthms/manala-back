@@ -63,6 +63,10 @@ class PensionController extends Controller
     return response(null, 204);
   }
 
+  public function webPensions()
+  {
+    return Pension::where("display", true)->get();
+  }
 
   public function refreshPrices()
   {

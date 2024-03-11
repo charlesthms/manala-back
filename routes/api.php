@@ -50,11 +50,12 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
   Route::apiResource('/invoices',     InvoiceController::class);
   Route::apiResource('/horses',       HorsesController::class);
   Route::apiResource('/invoiceItem',  InvoiceItemController::class);
+  Route::apiResource('/pensions',     PensionController::class);
 });
 
 Route::post('/login',  [AuthController::class, 'login']);
 
-Route::apiResource('/pensions',     PensionController::class);
+Route::get('/web/pensions', [PensionController::class, 'webPensions']);
 
 Route::get('emails/{id}', [App\Http\Controllers\EmailController::class, 'view'])->name('emails.view');
 
@@ -65,6 +66,6 @@ Route::get('/export', [App\Http\Controllers\Api\ExportController::class, 'export
 
 Route::get("/debug", function () {
   return response()->json([
-    'message' => 'Up and running!'
+    'message' => 'v1.1.2'
   ]);
 });

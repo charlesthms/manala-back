@@ -15,6 +15,7 @@ class Pension extends Model
     'color',
     'description',
     'attributes',
+    'display',
   ];
 
   public function clients()
